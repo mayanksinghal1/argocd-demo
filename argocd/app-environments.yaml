@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: app-environments
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - environment: dev
+            namespace: app-dev
+          - environment: sit
+            namespace: app-sit
+          - environment: nft
+            namespace: app-nft
+
+  template:
+    metadata:
+      name: 'app-{{environment}}'
+
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/mayanksinghal1/argocd-demo.git
+        targetRevision: main
+        path: charts/app
+
+        helm:
+          valueFiles:
+            - '../../environments/{{environment}}/app-values.yaml'
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+
+      syncOptions:
+        - CreateNamespace=true
