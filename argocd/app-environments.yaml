@@ -3,6 +3,7 @@ kind: ApplicationSet
 metadata:
   name: app-environments
   namespace: argocd
+
 spec:
   generators:
     - list:
@@ -39,5 +40,5 @@ spec:
           prune: true
           selfHeal: true
 
-      syncOptions:
-        - CreateNamespace=true
+        syncOptions:
+          - CreateNamespace=true
