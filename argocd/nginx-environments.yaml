@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nginx-environments
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - environment: dev
+            namespace: demo-dev
+          - environment: sit
+            namespace: demo-sit
+          - environment: nft
+            namespace: demo-nft
+
+  template:
+    metadata:
+      name: 'nginx-{{environment}}'
+
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/mayanksinghal1/argocd-demo.git
+        targetRevision: main
+        path: charts/nginx
+
+        helm:
+          valueFiles:
+            - '../../environments/{{environment}}/values.yaml'
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+
+        syncOptions:
+          - CreateNamespace=true
